@@ -7,6 +7,8 @@ use App\Models\EstudianteMatriculado;
 use App\Models\Grupo;
 use Illuminate\Database\QueryException;
 
+mutates(Grupo::class);
+
 /*
  | IF6100 - Segunda entrega. Casos CP-03 a CP-13 contra el contrato actualizado.
  |
