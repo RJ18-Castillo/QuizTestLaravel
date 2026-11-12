@@ -251,3 +251,33 @@ test('CP-13 nuevoCP13: un estudiante no se matricula dos veces en el mismo grupo
         ->where('estudiante_id', $estudiante->id)
         ->count())->toBe(1);
 });
+
+// ---------- Parte C3: tests agregados para eliminar mutantes sobrevivientes ----------
+// Los 12 mutantes "untested" estaban en Grupo.php, línea 92 (mensaje de error de
+// registrarNota): CP-12 solo comprobaba la clase de la excepción, no su mensaje.
+
+test('C3-01 registrarNota informa el rango válido 0-10 en el mensaje de error', function (float $nota) {
+    $grupo = grupo01();
+    $estudiante = estudianteC12345(docenteFijo(1001));
+    $grupo->estudiantes()->attach($estudiante->id);
+
+    $mensaje = null;
+    try {
+        $grupo->registrarNota($estudiante, $nota);
+    } catch (InvalidArgumentException $e) {
+        $mensaje = $e->getMessage();
+    }
+
+    expect($mensaje)->toBe('La nota debe estar entre 0 y 10.');
+    expect(matricula($grupo, $estudiante)->nota)->toBeNull();
+})->with([-1, 10.5]);
+
+test('C3-02 registrarNota acepta los límites 0 y 10', function (float $nota) {
+    $grupo = grupo01();
+    $estudiante = estudianteC12345(docenteFijo(1001));
+    $grupo->estudiantes()->attach($estudiante->id);
+
+    $grupo->registrarNota($estudiante, $nota);
+
+    expect(matricula($grupo, $estudiante)->nota)->toBeFloat()->toBe($nota);
+})->with([0, 10]);
