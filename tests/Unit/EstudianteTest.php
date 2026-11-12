@@ -26,7 +26,7 @@ class EstudianteTest extends TestCase
             'carne' => 'C00001',
             'nombre' => 'Pedro',
             'apellidos' => 'Salas Ruiz',
-            'docente_id' => $this->docente()->id,
+            'consejero_id' => $this->docente()->id,
         ]);
 
         $this->assertDatabaseHas('estudiantes', [
@@ -43,7 +43,7 @@ class EstudianteTest extends TestCase
             'carne' => 'C00001',
             'nombre' => 'Pedro',
             'apellidos' => 'Salas Ruiz',
-            'docente_id' => $docente->id,
+            'consejero_id' => $docente->id,
         ]);
 
         $this->assertTrue($estudiante->consejero->is($docente));
@@ -57,7 +57,7 @@ class EstudianteTest extends TestCase
                 'carne' => $carne,
                 'nombre' => 'X',
                 'apellidos' => 'Y',
-                'docente_id' => $docente->id,
+                'consejero_id' => $docente->id,
             ]);
         }
 

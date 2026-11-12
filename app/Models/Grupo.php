@@ -2,10 +2,21 @@
 
 namespace App\Models;
 
+use DomainException;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 
 class Grupo extends Model
 {
+    /** @use HasFactory<\Database\Factories\GrupoFactory> */
+    use HasFactory;
+
+    public const MAX_DOCENTES = 2;
+    public const MIN_ESTUDIANTES_PARA_ABRIR = 15;
+    public const NOTA_MINIMA = 0;
+    public const NOTA_MAXIMA = 10;
+
     protected $fillable = ['numero_ciclo', 'ano', 'numero_grupo', 'abierto', 'curso_id'];
 
     protected $casts = ['abierto' => 'boolean'];
@@ -17,35 +28,26 @@ class Grupo extends Model
 
     public function docentes()
     {
-        return $this->belongsToMany(Docente::class, 'docente_grupo')->withTimestamps();
+        return $this->belongsToMany(Docente::class, 'grupo_docente')->withTimestamps();
     }
 
     public function estudiantes()
     {
-        return $this->belongsToMany(Estudiante::class, 'estudiante_matriculado')
+        return $this->belongsToMany(Estudiante::class, 'estudiantes_matriculados')
             ->using(EstudianteMatriculado::class)
             ->withPivot('nota')
             ->withTimestamps();
     }
 
-    public const MAX_DOCENTES = 2;
-    public const MIN_ESTUDIANTES_PARA_ABRIR = 15;
-
     /**
-     * RN-02: un grupo acepta como máximo 2 docentes.
+     * RN-02: cada grupo lo imparten 1 o 2 docentes.
      *
-     * @throws \DomainException si el grupo ya tiene 2 docentes.
+     * @throws DomainException si el grupo ya tiene 2 docentes.
      */
-    public function asignarDocente(int $codEmpleado): void
+    public function asignarDocente(Docente $docente): void
     {
-        $docente = Docente::where('cod_empleado', $codEmpleado)->firstOrFail();
-
-        if ($this->docentes()->where('docentes.id', $docente->id)->exists()) {
-            return;
-        }
-
         if ($this->docentes()->count() >= self::MAX_DOCENTES) {
-            throw new \DomainException(
+            throw new DomainException(
                 'Un grupo no puede tener más de ' . self::MAX_DOCENTES . ' docentes.'
             );
         }
@@ -54,7 +56,7 @@ class Grupo extends Model
     }
 
     /**
-     * RN-05 y RN-02: se abre con al menos 15 estudiantes y 1 docente.
+     * RN-05 y RN-02: se abre con al menos 15 estudiantes y al menos 1 docente.
      */
     public function puedeAbrirse(): bool
     {
@@ -63,12 +65,12 @@ class Grupo extends Model
     }
 
     /**
-     * @throws \DomainException si no se cumplen las condiciones para abrir.
+     * @throws DomainException si no se cumplen las condiciones para abrir.
      */
     public function abrir(): void
     {
         if (! $this->puedeAbrirse()) {
-            throw new \DomainException(
+            throw new DomainException(
                 'El grupo necesita al menos ' . self::MIN_ESTUDIANTES_PARA_ABRIR
                 . ' estudiantes y 1 docente para abrirse.'
             );
@@ -76,5 +78,21 @@ class Grupo extends Model
 
         $this->abierto = true;
         $this->save();
+    }
+
+    /**
+     * RN-04 y RN-06: guarda la nota de la matrícula; debe estar entre 0 y 10.
+     *
+     * @throws InvalidArgumentException si la nota está fuera de 0-10.
+     */
+    public function registrarNota(Estudiante $estudiante, float $nota): void
+    {
+        if ($nota < self::NOTA_MINIMA || $nota > self::NOTA_MAXIMA) {
+            throw new InvalidArgumentException(
+                'La nota debe estar entre ' . self::NOTA_MINIMA . ' y ' . self::NOTA_MAXIMA . '.'
+            );
+        }
+
+        $this->estudiantes()->updateExistingPivot($estudiante->id, ['nota' => $nota]);
     }
 }

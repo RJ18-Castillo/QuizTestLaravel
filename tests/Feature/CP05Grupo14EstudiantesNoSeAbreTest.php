@@ -17,7 +17,7 @@ class CP05Grupo14EstudiantesNoSeAbreTest extends TestCase
         $curso = $this->crearCurso();
         $grupo = $this->crearGrupo01($curso, false);
         $d1001 = $this->docente1001();
-        $grupo->asignarDocente(1001);
+        $grupo->asignarDocente($d1001);
         $this->matricularEstudiantes($grupo, $d1001, 14);
 
         $this->assertFalse($grupo->puedeAbrirse());

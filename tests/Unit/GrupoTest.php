@@ -46,7 +46,7 @@ class GrupoTest extends TestCase
                 'carne' => sprintf('C%05d', $i),
                 'nombre' => "Estudiante$i",
                 'apellidos' => "Apellido$i",
-                'docente_id' => $d1->id,
+                'consejero_id' => $d1->id,
             ]);
             $grupo->estudiantes()->attach($est->id, ['nota' => 70 + $i]);
         }

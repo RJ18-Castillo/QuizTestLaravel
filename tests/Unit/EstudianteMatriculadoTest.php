@@ -38,7 +38,7 @@ class EstudianteMatriculadoTest extends TestCase
             'carne' => 'C00001',
             'nombre' => 'Pedro',
             'apellidos' => 'Salas',
-            'docente_id' => $docente->id,
+            'consejero_id' => $docente->id,
         ]);
 
         return [$grupo, $estudiante];
@@ -50,7 +50,7 @@ class EstudianteMatriculadoTest extends TestCase
 
         $grupo->estudiantes()->attach($estudiante->id, ['nota' => 85.5]);
 
-        $this->assertDatabaseHas('estudiante_matriculado', [
+        $this->assertDatabaseHas('estudiantes_matriculados', [
             'grupo_id' => $grupo->id,
             'estudiante_id' => $estudiante->id,
             'nota' => 85.5,

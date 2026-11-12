@@ -16,19 +16,19 @@ class CP04GrupoRechazaTercerDocenteTest extends TestCase
     {
         $curso = $this->crearCurso();
         $grupo = $this->crearGrupo01($curso, false);
-        $this->docente1001();
-        $this->docente1002();
+        $d1001 = $this->docente1001();
+        $d1002 = $this->docente1002();
         $d1003 = $this->docente1003();
-        $grupo->asignarDocente(1001);
-        $grupo->asignarDocente(1002);
+        $grupo->asignarDocente($d1001);
+        $grupo->asignarDocente($d1002);
 
         $this->expectException(DomainException::class);
 
         try {
-            $grupo->asignarDocente(1003);
+            $grupo->asignarDocente($d1003);
         } finally {
             $this->assertCount(2, $grupo->fresh()->docentes);
-            $this->assertDatabaseMissing('docente_grupo', [
+            $this->assertDatabaseMissing('grupo_docente', [
                 'grupo_id' => $grupo->id,
                 'docente_id' => $d1003->id,
             ]);

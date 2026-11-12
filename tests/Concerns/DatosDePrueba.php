@@ -65,7 +65,7 @@ trait DatosDePrueba
                 'carne' => sprintf('C%05d', $i),
                 'nombre' => "Estudiante$i",
                 'apellidos' => "Apellido$i",
-                'docente_id' => $consejero->id,
+                'consejero_id' => $consejero->id,
             ]);
             $grupo->estudiantes()->attach($estudiante->id);
         }
